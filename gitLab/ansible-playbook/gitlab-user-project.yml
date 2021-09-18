@@ -1,0 +1,118 @@
+---	
+- hosts: localhost
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/test.yml
+  tasks:
+    - name: create gitlab company
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.company }}"
+        path: "{{ project.company }}"
+        state: present
+    - name: create gitlab group
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.group_name }}"
+        path: "{{ project.group_name }}"
+        state: present
+        parent: "{{ project.company }}"
+    - name: create gitlab program_type
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.program_type }}"
+        path: "{{ project.program_type }}"
+        state: present
+        parent: "{{ project.company }}/{{ project.group_name }}"
+    - name: create gitlab client_name
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.client_name }}"
+        path: "{{ project.client_name }}"
+        state: present
+        parent: "{{ project.company }}/{{ project.group_name }}/{{ project.program_type }}"
+    - name: create gitlab track
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.track }}"
+        path: "{{ project.track }}"
+        state: present
+        parent: "{{ project.company }}/{{ project.group_name }}/{{ project.program_type }}/{{ project.client_name }}"
+    - name: create gitlab track_name
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.track_name }}"
+        path: "{{ project.track_name }}"
+        state: present
+        parent: "{{ project.company }}/{{ project.group_name }}/{{ project.program_type }}/{{ project.client_name }}/{{ project.track }}"
+    - name: create gitlab batch_number
+      community.general.gitlab_group:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ project.batch_number }}"
+        path: "{{ project.batch_number }}"
+        state: present
+        parent: "{{ project.company }}/{{ project.group_name }}/{{ project.program_type }}/{{ project.client_name }}/{{ project.track }}/{{ project.track_name }}"
+    #READING CSV
+    - name: "Read from csv"
+      read_csv:
+        path: "{{ csvpath }}" #../vars/user.csv
+      register: userlist
+    - name: Create GitLab User Project in group
+      community.general.gitlab_project:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ user.project_name }}"
+        group: "{{ project.company }}/{{ project.group_name }}/{{ project.program_type }}/{{ project.client_name }}/{{ project.track }}/{{ project.track_name }}/{{ project.batch_number }}"
+        issues_enabled: True
+        merge_method: rebase_merge
+        wiki_enabled: True
+        snippets_enabled: True
+        import_url: "{{ project.import_url }}"
+        state: present
+      delegate_to: localhost
+      loop: "{{ userlist.list }}"
+      loop_control:
+        loop_var: user
+    - name: "Create GitLab User"
+      community.general.gitlab_user:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        name: "{{ user.name }}"
+        username: "{{ user.username }}"
+        password: "{{ user.password }}"
+        email: "{{ user.email }}"
+        confirm: no
+        state: present
+      loop: "{{ userlist.list }}"
+      loop_control:
+        loop_var: user
+    - name: Add a user to a GitLab Project
+      community.general.gitlab_project_members:
+        api_url: "{{ gitlab.api_url}}"
+        api_token: "{{ gitlab.api_token }}"
+        validate_certs: False
+        project: "{{ user.project_name }}"
+        gitlab_user: "{{ user.username }}"
+        access_level: "{{ user_access_level }}"
+        state: present
+      loop: "{{ userlist.list }}"
+      loop_control:
+        loop_var: user
+    

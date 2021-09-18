@@ -1,0 +1,54 @@
+---
+- name: GitLab Post | Obtain Access Token
+  uri:
+    url: "{{ gitlab_endpoint }}/-/profile/personal_access_tokens"
+    method: POST
+    validate_certs: no
+    status_code: 200
+    body_format: json
+    headers:
+        Content-Type: application/json
+    body: >
+        {
+        "grant_type": "password",
+        "username": "student{{ item }}",
+        "password": "password@123"
+        }
+  register: gitlab_access_token
+  tags:
+  - always
+
+- name: GitLab Get | Get All User projects
+  uri:
+    url: "{{ gitlab_endpoint }}/api/v4//users/student{{ item }}/projects"
+    method: GET
+    validate_certs: no
+    status_code:
+        - 200
+        - 201
+        - 409
+    headers:
+        Content-Type: application/json
+        Authorization: Bearer {{ gitlab_access_token.json.access_token }}
+  register: user_projects
+  tags:
+  - destroy
+
+- name: GitLab Post | Delete Projects via API
+  uri:
+    url: "{{ gitlab_endpoint }}/api/v4/projects/{{ project.id }}"
+    method: DELETE
+    validate_certs: no
+    status_code:
+        - 200
+        - 201
+        - 202
+        - 409
+    headers:
+        Content-Type: application/json
+        Authorization: Bearer {{ gitlab_access_token.json.access_token }}
+  loop: "{{ user_projects.json }}"
+  loop_control:
+    loop_var: project
+  tags:
+  - destroy

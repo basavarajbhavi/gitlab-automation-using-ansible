@@ -1,0 +1,79 @@
+---
+- hosts: all
+  tasks:
+    # - name: "Delete GitLab Group"
+    #   community.general.gitlab_group:
+    #     api_url: http://localhost:8080/
+    #     api_token: "{{CUivwY2io91d-cFjyvAt}}"
+    #     validate_certs: False
+    #     name: my_first_group
+    #     state: absent
+
+    - name: "Create GitLab Group"
+      community.general.gitlab_group:
+        api_url: http://localhost:8080/
+        api_token: "{{CUivwY2io91d-cFjyvAt}}"
+        validate_certs: True
+        api_username: root
+        api_password: "password@123"
+        name: my_first_group
+        path: my_first_group
+        state: present
+
+    # The group will by created at https://gitlab.dj-wasabi.local/super_parent/parent/my_first_group
+    - name: "Create GitLab SubGroup"
+      community.general.gitlab_group:
+        api_url: http://localhost.com/
+        validate_certs: True
+        api_username: root
+        api_password: "password@123"
+        name: my_first_subgroup
+        path: my_first_subgroup
+        state: present
+        parent: "super_parent/parent"
+
+
+
+
+
+
+
+
+
+
+
+        - name: "Delete GitLab Group"
+      community.general.gitlab_group:
+        api_url: http://localhost:8080/
+        api_token: "wj6oi9dSkFfq56BnkxXw"
+        validate_certs: False
+        name: my_first_group
+        state: absent
+
+
+
+        - name: "Create GitLab SubGroup"
+          community.general.gitlab_group:
+            api_url: http://localhost:8080/
+            validate_certs: True
+            api_token: "wj6oi9dSkFfq56BnkxXw"
+            name: group1
+            path: group1
+            state: present
+            parent: "group"
+
+- name: Create Gitlab User
+  gitlab_user:
+    server_url: http://localhost:8080/
+    validate_certs: False
+    api_token: "wj6oi9dSkFfq56BnkxXw"
+    name: Balamurgan
+    username: Bala
+    password: password@123
+    email: 123balu42@gmail.com
+    state: present
+  delegate_to: localhost
+
+
+
+  ssh-keygen -t ed25519 -C "basavarajbhavi@ymail.com"

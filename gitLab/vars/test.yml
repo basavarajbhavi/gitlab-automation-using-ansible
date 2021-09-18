@@ -1,0 +1,22 @@
+gitlab:
+  api_url: http://localhost:8080/
+  api_token: "wj6oi9dSkFfq56BnkxXw"
+project:
+  company: skillassure
+  path: skillassure
+  group_name: LOB
+  program_type: FIT
+  client_name: Amadeus
+  track: Track
+  track_name: UI
+  batch_number: b2_19-07-2021
+  #user_project: springboot1
+  import_url: https://github.com/123balu42/my-profile-vuejs.git
+user_access_level: developer
+#user:
+  #access_level: developer
+  #name: abc3
+  #username: abc3
+  #password: password@123
+  #email: basava121323sdsraj@gmail.com
+csvpath: ../vars/user.csv

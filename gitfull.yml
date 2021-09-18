@@ -1,0 +1,58 @@
+---
+- hosts: localhost
+  become: yes
+  become_user: root
+  tasks:
+    - name: gitlab group create
+      community.general.gitlab_group:
+        api_url: http://localhost:8080/
+        api_token: "wj6oi9dSkFfq56BnkxXw"
+        validate_certs: False
+        name: group
+        path: group
+        state: present
+    - name: "Create GitLab SubGroup"
+      community.general.gitlab_group:
+        api_url: http://localhost:8080/
+        validate_certs: False
+        api_token: "wj6oi9dSkFfq56BnkxXw"
+        name: group1
+        path: group1
+        parent: "group"
+    - name: "Create GitLab User"
+      community.general.gitlab_user:
+        api_url: http://localhost:8080/
+        validate_certs: False
+        api_token: "wj6oi9dSkFfq56BnkxXw"
+        name: bala
+        username: balamurgan
+        password: mysecretpassword
+        email: me@example.com
+        sshkey_name: basavarajbhavi@ymail.com
+        sshkey_file: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAwnn3HJDZPlt/b/LrtpijJlV2asDex55u8xaAiwOpG2 basavarajbhavi@y>
+        state: present
+        group: group/group1
+        access_level: owner
+    - name: Create GitLab Project in group
+      community.general.gitlab_project:
+        api_url: http://localhost:8080/
+        validate_certs: False
+        api_token: "wj6oi9dSkFfq56BnkxXw"
+        name: repo1
+        group: group/group1
+        issues_enabled: False
+        merge_method: rebase_merge
+        wiki_enabled: True
+        snippets_enabled: True
+        import_url: https://github.com/123balu42/my-profile-vuejs.git
+        state: present
+      delegate_to: localhost
+    - name: Add a user to a GitLab Project
+      community.general.gitlab_project_members:
+        api_url: 'http://localhost:8080'
+        api_token: 'wj6oi9dSkFfq56BnkxXw'
+        validate_certs: False
+        project: repo1
+        gitlab_user: prahas
+        access_level: developer
+        state: present

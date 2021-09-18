@@ -1,0 +1,27 @@
+---
+- name: Configure GitLab User Instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+  - student_count: 50
+  - github_personal_access_token: NFy_LxYyRxrdkC2k29A4 
+  - github_repo: devops_java/Spring
+  - gitlab_endpoint: http://localhost:8080
+
+  tasks:
+
+  - name: Get GitHub Repo Import Repo ID
+    uri:
+      url: "http://localhost:8080/{{ github_repo }}"
+      method: GET
+      validate_certs: no
+      status_code:
+          - 200
+          - 201
+          - 409
+    register: github_repo_info
+
+  - name: Configure Per User GitLab Environment
+    include_tasks: actual_user_config.yaml
+    with_sequence: start=0 end="{{ student_count }}"
